@@ -91,17 +91,18 @@ ALTER TABLE friendships
 		FOREIGN KEY (status_id) REFERENCES profile_statuses(id);
 		
 -- 3. Определить кто больше поставил лайков (всего) - мужчины или женщины?
-SELECT COUNT(*) from profiles WHERE gender = 'M';
-SELECT COUNT(*) from profiles WHERE gender = 'P';
+SELECT COUNT(*) FROM likes WHERE user_id IN(SELECT user_id from profiles WHERE gender = 'M');
+SELECT COUNT(*) FROM likes WHERE user_id IN(SELECT user_id from profiles WHERE gender = 'P');
 
 SELECT CASE
-			WHEN (SELECT COUNT(*) from profiles WHERE gender = 'M') > (SELECT COUNT(*) from profiles WHERE gender = 'P')
+			WHEN (SELECT COUNT(*) FROM likes WHERE user_id IN(SELECT user_id from profiles WHERE gender = 'M')) > (SELECT COUNT(*) FROM likes WHERE user_id IN(SELECT user_id from profiles WHERE gender = 'P'))
 			THEN 'Мужчин больше'
-			WHEN (SELECT COUNT(*) from profiles WHERE gender = 'M') = (SELECT COUNT(*) from profiles WHERE gender = 'P')
+			WHEN (SELECT COUNT(*) FROM likes WHERE user_id IN(SELECT user_id from profiles WHERE gender = 'M')) = (SELECT COUNT(*) FROM likes WHERE user_id IN(SELECT user_id from profiles WHERE gender = 'P'))
 			THEN 'Одинаково'
 			ELSE 'Женщин больше'
 		END AS 'Количество';
 
+SELECT * FROM target_types tt ;
 -- 4. Подсчитать общее количество лайков десяти самым молодым пользователям (сколько лайков получили 10 самых молодых пользователей).
 SELECT COUNT(*) FROM likes WHERE target_id IN (
 	SELECT user_id FROM (
@@ -110,7 +111,7 @@ SELECT COUNT(*) FROM likes WHERE target_id IN (
 -- 	    user_id
 -- 	  FROM profiles
 	  SELECT user_id FROM profiles ORDER BY birthday DESC LIMIT 10
-	) AS birthday_rows
+	) AS birthday_rows WHERE target_type_id = (SELECT id FROM target_types tt WHERE name = 'users')
 -- 	WHERE rownumber <11
 ); 
 -- Вариант в комментариях для стандартной SQL нотации.
